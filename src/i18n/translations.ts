@@ -136,6 +136,21 @@ const sv = {
     unmatchedHint: 'Dessa namn kunde inte matchas mot listan och importerades inte. Lägg till dem manuellt om de är korrekta.',
     confirmImport: 'Importera {count} arter',
   },
+  sync: {
+    title: 'Synk mellan enheter',
+    bodyLoggedOut:
+      'Logga in med din e-post för att synka dina listor mellan t.ex. mobilen och datorn. Ingen lösenord behövs — du får en inloggningslänk via mejl.',
+    emailPlaceholder: 'din@epost.se',
+    sendLink: 'Skicka inloggningslänk',
+    linkSent: 'Länk skickad! Kolla din inkorg och klicka på länken för att logga in på den här enheten.',
+    linkError: 'Kunde inte skicka länken. Kontrollera e-postadressen och försök igen.',
+    loggedInAs: 'Inloggad som {email}',
+    signOut: 'Logga ut',
+    statusSyncing: 'Synkar...',
+    statusSynced: 'Synkad',
+    statusError: 'Synk misslyckades — dina ändringar sparas lokalt tills anslutningen fungerar igen.',
+    notConfigured: 'Molnsynk är inte konfigurerad för den här driftsättningen.',
+  },
   settings: {
     title: 'Inställningar',
     language: 'Språk',
@@ -300,6 +315,21 @@ const en: Translations = {
     unmatchedCount: '{count} could not be matched',
     unmatchedHint: 'These names could not be matched against the list and were not imported. Add them manually if they are correct.',
     confirmImport: 'Import {count} species',
+  },
+  sync: {
+    title: 'Sync across devices',
+    bodyLoggedOut:
+      'Sign in with your email to sync your lists between, say, your phone and computer. No password needed — you get a sign-in link by email.',
+    emailPlaceholder: 'you@email.com',
+    sendLink: 'Send sign-in link',
+    linkSent: 'Link sent! Check your inbox and click the link to sign in on this device.',
+    linkError: 'Could not send the link. Check the email address and try again.',
+    loggedInAs: 'Signed in as {email}',
+    signOut: 'Sign out',
+    statusSyncing: 'Syncing...',
+    statusSynced: 'Synced',
+    statusError: "Sync failed — your changes are saved locally until the connection works again.",
+    notConfigured: 'Cloud sync is not configured for this deployment.',
   },
   settings: {
     title: 'Settings',

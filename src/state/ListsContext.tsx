@@ -1,14 +1,19 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { loadUserLists, saveUserLists } from '../storage/db';
+import { supabase } from '../lib/supabaseClient';
+import { useAuth } from './AuthContext';
 import type { Observation, Sighting, SourceListId, UserList } from '../types';
 
 function uid() {
   return crypto.randomUUID();
 }
 
+export type SyncStatus = 'off' | 'syncing' | 'synced' | 'error';
+
 interface ListsContextValue {
   lists: UserList[];
   loading: boolean;
+  syncStatus: SyncStatus;
   createList: (input: { name: string; color: string; source: SourceListId; includeCategoryDE?: boolean }) => UserList;
   deleteList: (id: string) => void;
   updateListMeta: (id: string, patch: Partial<Pick<UserList, 'name' | 'color' | 'includeCategoryDE'>>) => void;
@@ -22,10 +27,14 @@ interface ListsContextValue {
 const ListsContext = createContext<ListsContextValue | null>(null);
 
 export function ListsProvider({ children }: { children: ReactNode }) {
+  const { enabled: syncEnabled, session } = useAuth();
   const [lists, setLists] = useState<UserList[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('off');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasLoaded = useRef(false);
+  const skipNextPush = useRef(false);
+  const userId = session?.user.id ?? null;
 
   useEffect(() => {
     loadUserLists().then((stored) => {
@@ -45,6 +54,51 @@ export function ListsProvider({ children }: { children: ReactNode }) {
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
   }, [lists]);
+
+  useEffect(() => {
+    if (!syncEnabled || !supabase || !userId || !hasLoaded.current) return;
+    let cancelled = false;
+    setSyncStatus('syncing');
+    supabase
+      .from('user_lists')
+      .select('data')
+      .eq('user_id', userId)
+      .maybeSingle()
+      .then(async ({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          setSyncStatus('error');
+          return;
+        }
+        if (data) {
+          skipNextPush.current = true;
+          setLists(data.data as UserList[]);
+        } else {
+          await supabase!.from('user_lists').upsert({ user_id: userId, data: lists, updated_at: new Date().toISOString() });
+        }
+        setSyncStatus('synced');
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [syncEnabled, userId]);
+
+  useEffect(() => {
+    if (!syncEnabled || !supabase || !userId || !hasLoaded.current) return;
+    if (skipNextPush.current) {
+      skipNextPush.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      setSyncStatus('syncing');
+      supabase!
+        .from('user_lists')
+        .upsert({ user_id: userId, data: lists, updated_at: new Date().toISOString() })
+        .then(({ error }) => setSyncStatus(error ? 'error' : 'synced'));
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [lists, syncEnabled, userId]);
 
   const createList: ListsContextValue['createList'] = useCallback(({ name, color, source, includeCategoryDE }) => {
     const newList: UserList = {
@@ -111,6 +165,7 @@ export function ListsProvider({ children }: { children: ReactNode }) {
     () => ({
       lists,
       loading,
+      syncStatus,
       createList,
       deleteList,
       updateListMeta,
@@ -120,7 +175,7 @@ export function ListsProvider({ children }: { children: ReactNode }) {
       replaceAllLists,
       lastActivity,
     }),
-    [lists, loading, createList, deleteList, updateListMeta, getList, toggleSeen, setSightings, replaceAllLists, lastActivity],
+    [lists, loading, syncStatus, createList, deleteList, updateListMeta, getList, toggleSeen, setSightings, replaceAllLists, lastActivity],
   );
 
   return <ListsContext.Provider value={value}>{children}</ListsContext.Provider>;

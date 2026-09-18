@@ -1,14 +1,29 @@
 import { useRef, useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useLists } from '../state/ListsContext';
+import { useAuth } from '../state/AuthContext';
 import { exportBackup, parseBackup } from '../storage/db';
 
 export default function Settings() {
   const { t, language, setLanguage } = useLanguage();
-  const { lists, replaceAllLists } = useLists();
+  const { lists, replaceAllLists, syncStatus } = useLists();
+  const { enabled: syncEnabled, session, authLoading, signInWithEmail, signOut } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [email, setEmail] = useState('');
+  const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [sendingLink, setSendingLink] = useState(false);
+
+  async function handleSendLink(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setSendingLink(true);
+    setSyncMessage(null);
+    const { error } = await signInWithEmail(email.trim());
+    setSendingLink(false);
+    setSyncMessage(error ? { type: 'error', text: t('sync.linkError') } : { type: 'success', text: t('sync.linkSent') });
+  }
 
   function handleExport() {
     const json = exportBackup(lists);
@@ -72,6 +87,55 @@ export default function Settings() {
             {t('settings.languageEn')}
           </button>
         </div>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">{t('sync.title')}</h2>
+        {!syncEnabled ? (
+          <p className="text-sm text-muted">{t('sync.notConfigured')}</p>
+        ) : authLoading ? (
+          <p className="text-sm text-muted">{t('common.loading')}</p>
+        ) : session ? (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-medium text-ink">{t('sync.loggedInAs', { email: session.user.email ?? '' })}</p>
+                <p className="mt-1 text-xs text-muted">
+                  {syncStatus === 'syncing' && t('sync.statusSyncing')}
+                  {syncStatus === 'synced' && t('sync.statusSynced')}
+                  {syncStatus === 'error' && t('sync.statusError')}
+                </p>
+              </div>
+              <button onClick={() => signOut()} className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-ink hover:bg-cream-dark/40">
+                {t('sync.signOut')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <p className="mb-3 text-sm text-muted">{t('sync.bodyLoggedOut')}</p>
+            <form onSubmit={handleSendLink} className="flex flex-wrap gap-3">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t('sync.emailPlaceholder')}
+                className="min-w-[220px] flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-ink outline-none focus:border-gold"
+              />
+              <button
+                type="submit"
+                disabled={sendingLink}
+                className="rounded-xl bg-gold px-5 py-2.5 font-medium text-white hover:bg-gold-dark disabled:opacity-50"
+              >
+                {t('sync.sendLink')}
+              </button>
+            </form>
+            {syncMessage && (
+              <p className={`mt-2 text-sm ${syncMessage.type === 'success' ? 'text-gold-dark' : 'text-danger'}`}>{syncMessage.text}</p>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="mb-8">
