@@ -1,5 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="96" fill="#211E1A"/>
-  <path d="M138 268 Q214 268 246 336 Q302 196 390 150" fill="none" stroke="#C8983F" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="368" cy="164" r="15" fill="#211E1A"/>
+
+  <line x1="160" y1="472" x2="352" y2="472" stroke="#C8983F" stroke-width="16" stroke-linecap="round"/>
+
+  <g>
+    <path d="M234 405 L 262 405 L 250 470 L 246 470 Z" fill="#C8983F"/>
+    <path d="M266 405 L 294 405 L 288 470 L 280 470 Z" fill="#C8983F"/>
+  </g>
+
+  <path d="M205 400 C 170 415, 140 450, 128 495 C 165 490, 200 470, 222 435 Z" fill="#C8983F"/>
+
+  <ellipse cx="256" cy="315" rx="102" ry="118" fill="#C8983F"/>
+
+  <circle cx="262" cy="172" r="74" fill="#C8983F"/>
+
+  <path d="M322 158 C 348 164, 372 174, 388 184 C 372 194, 348 200, 322 204 C 315 189, 315 173, 322 158 Z" fill="#C8983F"/>
+
+  <circle cx="292" cy="152" r="9" fill="#211E1A"/>
 </svg>
