@@ -130,6 +130,51 @@ export function matchSpecies(rawName: string, index: ReturnType<typeof buildSpec
   return index.byScientific.get(key) ?? index.bySwedish.get(key) ?? index.byEnglish.get(key);
 }
 
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  let prev = new Array(n + 1);
+  let curr = new Array(n + 1);
+  for (let j = 0; j <= n; j++) prev[j] = j;
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(curr[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+    }
+    [prev, curr] = [curr, prev];
+  }
+  return prev[n];
+}
+
+export interface SuggestedMatch {
+  species: ReferenceSpecies;
+  matchedName: string;
+  similarity: number;
+}
+
+export function suggestMatch(rawName: string, species: ReferenceSpecies[]): SuggestedMatch | undefined {
+  const key = norm(rawName);
+  if (key.length < 3) return undefined;
+  let best: SuggestedMatch | undefined;
+  for (const s of species) {
+    const candidates = [s.scientificName, s.nameSv, s.nameEn].filter((c): c is string => Boolean(c));
+    for (const candidate of candidates) {
+      const candidateKey = norm(candidate);
+      const maxLen = Math.max(key.length, candidateKey.length);
+      if (Math.abs(key.length - candidateKey.length) / maxLen > 0.4) continue;
+      const distance = levenshtein(key, candidateKey);
+      const similarity = 1 - distance / maxLen;
+      if (similarity >= 0.72 && (!best || similarity > best.similarity)) {
+        best = { species: s, matchedName: candidate, similarity };
+      }
+    }
+  }
+  return best;
+}
+
 export function generateTemplateCSV(language: Language): string {
   if (language === 'sv') {
     return [

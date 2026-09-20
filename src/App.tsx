@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import ListDetail from './pages/ListDetail';
 import NewList from './pages/NewList';
+import NewSighting from './pages/NewSighting';
 import Help from './pages/Help';
 import Settings from './pages/Settings';
 
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/lista/:listId" element={<ListDetail />} />
         <Route path="/ny-lista" element={<NewList />} />
+        <Route path="/nytt-kryss" element={<NewSighting />} />
         <Route path="/hjalp" element={<Help />} />
         <Route path="/installningar" element={<Settings />} />
       </Routes>

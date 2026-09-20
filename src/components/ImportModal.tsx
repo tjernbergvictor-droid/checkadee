@@ -7,7 +7,10 @@ import {
   matchSpecies,
   parseCSV,
   rowsToImportRows,
+  suggestMatch,
+  type ImportRow,
   type MatchedImportRow,
+  type SuggestedMatch,
 } from '../lib/importParser';
 import { CloseIcon, DownloadIcon, UploadIcon, CheckIcon, XCircleIcon } from './icons';
 import type { ReferenceSpecies } from '../types';
@@ -21,12 +24,17 @@ interface ImportModalProps {
 
 type Step = 'upload' | 'preview' | 'error';
 
+interface UnmatchedEntry {
+  row: ImportRow;
+  suggestion?: SuggestedMatch;
+}
+
 export default function ImportModal({ species, color, onClose, onImport }: ImportModalProps) {
   const { t, language } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<Step>('upload');
   const [matched, setMatched] = useState<MatchedImportRow[]>([]);
-  const [unmatched, setUnmatched] = useState<string[]>([]);
+  const [unmatched, setUnmatched] = useState<UnmatchedEntry[]>([]);
   const [errorMsg, setErrorMsg] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -68,14 +76,14 @@ export default function ImportModal({ species, color, onClose, onImport }: Impor
 
       const index = buildSpeciesIndex(species);
       const matchedRows: MatchedImportRow[] = [];
-      const unmatchedNames: string[] = [];
+      const unmatchedEntries: UnmatchedEntry[] = [];
       for (const row of rows) {
         const found = matchSpecies(row.rawName, index);
         if (found) matchedRows.push({ ...row, species: found });
-        else unmatchedNames.push(row.rawName);
+        else unmatchedEntries.push({ row, suggestion: suggestMatch(row.rawName, species) });
       }
       setMatched(matchedRows);
-      setUnmatched(unmatchedNames);
+      setUnmatched(unmatchedEntries);
       setStep('preview');
     } catch {
       setErrorMsg(t('importModal.errorParse'));
@@ -93,6 +101,16 @@ export default function ImportModal({ species, color, onClose, onImport }: Impor
 
   function handleConfirm() {
     onImport(matched);
+  }
+
+  function acceptSuggestion(entry: UnmatchedEntry) {
+    if (!entry.suggestion) return;
+    setMatched((prev) => [...prev, { ...entry.row, species: entry.suggestion!.species }]);
+    setUnmatched((prev) => prev.filter((u) => u !== entry));
+  }
+
+  function dismissSuggestion(entry: UnmatchedEntry) {
+    setUnmatched((prev) => prev.map((u) => (u === entry ? { ...u, suggestion: undefined } : u)));
   }
 
   return (
@@ -176,8 +194,32 @@ export default function ImportModal({ species, color, onClose, onImport }: Impor
               {unmatched.length > 0 && (
                 <div>
                   <p className="mb-1.5 text-xs font-medium text-muted">{t('importModal.unmatchedHint')}</p>
-                  <div className="max-h-32 overflow-y-auto rounded-xl border border-border bg-cream-dark/20 p-3 text-xs text-muted">
-                    {unmatched.join(', ')}
+                  <div className="max-h-64 space-y-2 overflow-y-auto">
+                    {unmatched.map((entry, i) => (
+                      <div key={i} className="rounded-xl border border-border bg-cream-dark/20 p-3 text-sm">
+                        <p className="text-ink">
+                          "{entry.row.rawName}"
+                          {entry.row.date && <span className="ml-1 text-xs text-muted">({entry.row.date})</span>}
+                        </p>
+                        {entry.suggestion && (
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+                            <span className="text-muted">
+                              {t('importModal.suggestionPrefix')} <strong>{displayName(entry.suggestion.species, language).primary}</strong>?
+                            </span>
+                            <button
+                              onClick={() => acceptSuggestion(entry)}
+                              className="rounded-full px-2.5 py-1 font-medium text-white"
+                              style={{ backgroundColor: color }}
+                            >
+                              {t('importModal.useSuggestion')}
+                            </button>
+                            <button onClick={() => dismissSuggestion(entry)} className="text-muted underline">
+                              {t('common.cancel')}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

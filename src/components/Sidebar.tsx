@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
-import { HomeIcon, PlusIcon, BookIcon, SettingsIcon, CloseIcon } from './icons';
+import { HomeIcon, PlusIcon, CheckIcon, BookIcon, SettingsIcon, CloseIcon } from './icons';
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -43,6 +43,10 @@ export default function Sidebar({ onNavigate, onClose }: SidebarProps) {
           <PlusIcon />
           {t('nav.newList')}
         </NavLink>
+        <NavLink to="/nytt-kryss" className={linkClass} onClick={onNavigate}>
+          <CheckIcon />
+          {t('nav.newSighting')}
+        </NavLink>
         <NavLink to="/hjalp" className={linkClass} onClick={onNavigate}>
           <BookIcon />
           {t('nav.help')}
@@ -53,7 +57,7 @@ export default function Sidebar({ onNavigate, onClose }: SidebarProps) {
         </NavLink>
       </nav>
 
-      <div className="border-t border-white/10 px-5 py-4 text-[11px] text-(--color-cream)/40">
+      <div className="border-t border-white/10 px-5 py-4 text-[11px] text-cream/40">
         AviList · VP11 · Sverigelistan 2026
       </div>
     </div>
