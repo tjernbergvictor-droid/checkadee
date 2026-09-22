@@ -15,6 +15,7 @@ import type { MatchedImportRow } from '../lib/importParser';
 import type { ReferenceSpecies, Sighting } from '../types';
 
 type SeenFilter = 'all' | 'seen' | 'unseen';
+type ViewMode = 'grouped' | 'chronological';
 
 export default function ListDetail() {
   const { listId } = useParams();
@@ -28,6 +29,7 @@ export default function ListDetail() {
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<'quick' | 'detail'>('quick');
   const [seenFilter, setSeenFilter] = useState<SeenFilter>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('grouped');
   const [showSubspecies, setShowSubspecies] = useState(false);
   const [collapsedOrders, setCollapsedOrders] = useState<Set<string>>(new Set());
   const [detailSpecies, setDetailSpecies] = useState<ReferenceSpecies | null>(null);
@@ -62,6 +64,22 @@ export default function ListDetail() {
   }, [mainSpecies, list, q, seenFilter, isFreeform]);
 
   const groups = useMemo(() => groupSpecies(browseFiltered), [browseFiltered]);
+
+  const chronological = useMemo(() => {
+    if (isFreeform || !list) return { dated: [] as { species: ReferenceSpecies; date: string }[], undated: [] as ReferenceSpecies[] };
+    const dated: { species: ReferenceSpecies; date: string }[] = [];
+    const undated: ReferenceSpecies[] = [];
+    for (const s of mainSpecies) {
+      if (!matchesQuery(s)) continue;
+      const obs = list.observations[s.id];
+      if (!obs?.seen) continue;
+      const dates = obs.sightings.map((x) => x.date).filter((d): d is string => Boolean(d)).sort();
+      if (dates[0]) dated.push({ species: s, date: dates[0] });
+      else undated.push(s);
+    }
+    dated.sort((a, b) => a.date.localeCompare(b.date));
+    return { dated, undated };
+  }, [isFreeform, list, mainSpecies, q]);
 
   const searchResults = useMemo(() => {
     if (!isFreeform || !data || q.length < 2) return [];
@@ -238,19 +256,36 @@ export default function ListDetail() {
 
       {!isFreeform && (
         <div className="mb-5 flex flex-wrap items-center gap-4">
-          <div className="flex gap-1.5">
-            {(['all', 'seen', 'unseen'] as SeenFilter[]).map((f) => (
-              <button
-                key={f}
-                onClick={() => setSeenFilter(f)}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  seenFilter === f ? 'bg-ink text-white' : 'bg-cream-dark text-ink/70'
-                }`}
-              >
-                {t(`listDetail.filter${f === 'all' ? 'All' : f === 'seen' ? 'Seen' : 'Unseen'}`)}
-              </button>
-            ))}
+          <div className="flex overflow-hidden rounded-full border border-border">
+            <button
+              onClick={() => setViewMode('grouped')}
+              className={`px-3 py-1 text-xs font-medium ${viewMode === 'grouped' ? 'bg-ink text-white' : 'bg-card text-ink/70'}`}
+            >
+              {t('listDetail.viewGrouped')}
+            </button>
+            <button
+              onClick={() => setViewMode('chronological')}
+              className={`px-3 py-1 text-xs font-medium ${viewMode === 'chronological' ? 'bg-ink text-white' : 'bg-card text-ink/70'}`}
+            >
+              {t('listDetail.viewChronological')}
+            </button>
           </div>
+
+          {viewMode === 'grouped' && (
+            <div className="flex gap-1.5">
+              {(['all', 'seen', 'unseen'] as SeenFilter[]).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setSeenFilter(f)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    seenFilter === f ? 'bg-ink text-white' : 'bg-cream-dark text-ink/70'
+                  }`}
+                >
+                  {t(`listDetail.filter${f === 'all' ? 'All' : f === 'seen' ? 'Seen' : 'Unseen'}`)}
+                </button>
+              ))}
+            </div>
+          )}
 
           {list.source === 'sverige' && (
             <label className="flex items-center gap-2 text-xs text-ink">
@@ -280,7 +315,47 @@ export default function ListDetail() {
 
       {loading && <p className="py-10 text-center text-sm text-muted">{t('common.loading')}</p>}
 
-      {!loading && !isFreeform && (
+      {!loading && !isFreeform && viewMode === 'chronological' && (
+        <div className="overflow-hidden rounded-2xl border border-border bg-card">
+          {chronological.dated.length === 0 && chronological.undated.length === 0 && (
+            <p className="px-4 py-10 text-center text-sm text-muted">{t('listDetail.noResults')}</p>
+          )}
+          {chronological.dated.map(({ species: s, date }, i) => (
+            <SpeciesRow
+              key={s.id}
+              species={s}
+              observation={list.observations[s.id]}
+              mode={mode}
+              color={list.color}
+              onToggleSeen={() => toggleSeen(list.id, s.id)}
+              onOpenDetail={() => openDetail(s)}
+              number={i + 1}
+              dateLabel={date}
+            />
+          ))}
+          {chronological.undated.length > 0 && (
+            <>
+              <div className="border-y border-border bg-cream-dark/60 px-4 py-2 text-xs font-semibold tracking-wide text-ink/80 uppercase">
+                {t('listDetail.undated')}
+              </div>
+              {chronological.undated.map((s, i) => (
+                <SpeciesRow
+                  key={s.id}
+                  species={s}
+                  observation={list.observations[s.id]}
+                  mode={mode}
+                  color={list.color}
+                  onToggleSeen={() => toggleSeen(list.id, s.id)}
+                  onOpenDetail={() => openDetail(s)}
+                  number={chronological.dated.length + i + 1}
+                />
+              ))}
+            </>
+          )}
+        </div>
+      )}
+
+      {!loading && !isFreeform && viewMode === 'grouped' && (
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
           {groups.length === 0 && <p className="px-4 py-10 text-center text-sm text-muted">{t('listDetail.noResults')}</p>}
           {groups.map((g) => {

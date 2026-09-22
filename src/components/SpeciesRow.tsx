@@ -11,9 +11,21 @@ interface SpeciesRowProps {
   onToggleSeen: () => void;
   onOpenDetail: () => void;
   indent?: boolean;
+  number?: number;
+  dateLabel?: string;
 }
 
-export default function SpeciesRow({ species, observation, mode, color, onToggleSeen, onOpenDetail, indent }: SpeciesRowProps) {
+export default function SpeciesRow({
+  species,
+  observation,
+  mode,
+  color,
+  onToggleSeen,
+  onOpenDetail,
+  indent,
+  number,
+  dateLabel,
+}: SpeciesRowProps) {
   const { language, t } = useLanguage();
   const { primary, secondary } = displayName(species, language);
   const seen = observation?.seen ?? false;
@@ -32,6 +44,9 @@ export default function SpeciesRow({ species, observation, mode, color, onToggle
         onClick={handleMainClick}
         className="flex flex-1 items-center gap-3 text-left"
       >
+        {number !== undefined && (
+          <span className="w-8 shrink-0 text-right text-xs font-medium text-muted tabular-nums">{number}</span>
+        )}
         <span
           className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors"
           style={{
@@ -51,6 +66,8 @@ export default function SpeciesRow({ species, observation, mode, color, onToggle
           </span>
         )}
       </button>
+
+      {dateLabel && <span className="hidden shrink-0 text-xs text-muted sm:block">{dateLabel}</span>}
 
       <button
         onClick={onOpenDetail}

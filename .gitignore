@@ -25,3 +25,8 @@ dist-ssr
 
 # Local Netlify folder
 .netlify
+
+# One-off personal data conversion scripts (reference local file paths, not reusable tooling)
+scripts/inspect-user-file*.mjs
+scripts/convert-user-checklist.mjs
+scripts/merge-sverige-details.mjs
