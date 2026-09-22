@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { loadUserLists, saveUserLists } from '../storage/db';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './AuthContext';
+import { loadReferenceList } from '../data/referenceData';
+import { visibleMainSpecies, applyLinkedListScope, countSeen } from '../lib/listStats';
 import type { Observation, Sighting, SourceListId, UserList } from '../types';
 
 function uid() {
@@ -36,7 +38,7 @@ interface ListsContextValue {
 const ListsContext = createContext<ListsContextValue | null>(null);
 
 export function ListsProvider({ children }: { children: ReactNode }) {
-  const { enabled: syncEnabled, session } = useAuth();
+  const { enabled: syncEnabled, session, displayName } = useAuth();
   const [lists, setLists] = useState<UserList[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('off');
@@ -108,6 +110,57 @@ export function ListsProvider({ children }: { children: ReactNode }) {
     }, 600);
     return () => clearTimeout(timer);
   }, [lists, syncEnabled, userId]);
+
+  useEffect(() => {
+    if (!syncEnabled || !supabase || !userId || !hasLoaded.current || !displayName) return;
+    const timer = setTimeout(async () => {
+      const shared = lists.filter((l) => l.sharedToLeaderboard);
+      const sources = [...new Set(shared.map((l) => l.source))];
+      const refDataList = await Promise.all(sources.map((s) => loadReferenceList(s)));
+      const refData = Object.fromEntries(sources.map((s, i) => [s, refDataList[i]]));
+
+      const rows = shared.map((list) => {
+        const data = refData[list.source];
+        const linkedList = list.linkedListId ? lists.find((l) => l.id === list.linkedListId) : undefined;
+        const scoped = applyLinkedListScope(visibleMainSpecies(data.species, list), list, linkedList);
+        const seenCount = countSeen(list, scoped.map((s) => s.id));
+        let lastName: string | undefined;
+        let lastDate: string | undefined;
+        for (const obs of Object.values(list.observations)) {
+          if (!obs.seen) continue;
+          for (const s of obs.sightings) {
+            if (s.date && (!lastDate || s.date > lastDate)) {
+              lastDate = s.date;
+              const species = data.species.find((sp) => sp.id === obs.speciesId);
+              lastName = species ? species.nameSv || species.nameEn : obs.speciesId;
+            }
+          }
+        }
+        return {
+          user_id: userId,
+          list_id: list.id,
+          display_name: displayName,
+          source: list.source,
+          list_name: list.name,
+          seen_count: seenCount,
+          last_species_name: lastName ?? null,
+          last_species_date: lastDate ?? null,
+          updated_at: new Date().toISOString(),
+        };
+      });
+
+      if (rows.length > 0) {
+        await supabase!.from('leaderboard_entries').upsert(rows, { onConflict: 'user_id,list_id' });
+      }
+      const sharedIds = shared.map((l) => l.id);
+      let deleteQuery = supabase!.from('leaderboard_entries').delete().eq('user_id', userId);
+      if (sharedIds.length > 0) {
+        deleteQuery = deleteQuery.not('list_id', 'in', `(${sharedIds.join(',')})`);
+      }
+      await deleteQuery;
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [lists, syncEnabled, userId, displayName]);
 
   const createList: ListsContextValue['createList'] = useCallback(({ name, color, source, includeCategoryDE, linkedListId }) => {
     const newList: UserList = {

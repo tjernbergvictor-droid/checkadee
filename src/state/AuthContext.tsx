@@ -6,8 +6,10 @@ interface AuthContextValue {
   enabled: boolean;
   session: Session | null;
   authLoading: boolean;
+  displayName: string | null;
   signInWithEmail: (email: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
+  setDisplayName: (name: string) => Promise<{ error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -33,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       enabled: isSupabaseConfigured,
       session,
       authLoading,
+      displayName: (session?.user.user_metadata?.display_name as string | undefined) ?? null,
       async signInWithEmail(email: string) {
         if (!supabase) return { error: 'not-configured' };
         const { error } = await supabase.auth.signInWithOtp({
@@ -44,6 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async signOut() {
         if (!supabase) return;
         await supabase.auth.signOut();
+      },
+      async setDisplayName(name: string) {
+        if (!supabase) return { error: 'not-configured' };
+        const { error } = await supabase.auth.updateUser({ data: { display_name: name } });
+        if (!error) {
+          const { data } = await supabase.auth.getSession();
+          setSession(data.session);
+        }
+        return error ? { error: error.message } : {};
       },
     }),
     [session, authLoading],

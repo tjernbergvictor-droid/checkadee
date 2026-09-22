@@ -108,6 +108,15 @@ export const PencilIcon = (p: IconProps) =>
     </>,
     p,
   );
+export const TrophyIcon = (p: IconProps) =>
+  base(
+    <>
+      <path d="M7 4h10v4a5 5 0 0 1-5 5 5 5 0 0 1-5-5V4Z" />
+      <path d="M7 5H4v1.5A3.5 3.5 0 0 0 7.5 10M17 5h3v1.5A3.5 3.5 0 0 1 16.5 10" />
+      <path d="M12 13v3M9 20h6M10 20v-2.2a2 2 0 0 1 1-1.73l1-.57 1 .57a2 2 0 0 1 1 1.73V20" />
+    </>,
+    p,
+  );
 export const XCircleIcon = (p: IconProps) =>
   base(
     <>

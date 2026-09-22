@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useLists } from '../state/ListsContext';
+import { useAuth } from '../state/AuthContext';
 import { useReferenceList } from '../hooks/useReferenceList';
 import { visibleMainSpecies, countSeen, subspeciesOf, applyLinkedListScope } from '../lib/listStats';
 import { groupSpecies } from '../lib/groupSpecies';
@@ -31,6 +32,7 @@ export default function ListDetail() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const { lists, getList, updateListMeta, deleteList, toggleSeen, setSightings } = useLists();
+  const { session: authSession } = useAuth();
 
   const list = listId ? getList(listId) : undefined;
   const linkedList = list?.linkedListId ? getList(list.linkedListId) : undefined;
@@ -425,6 +427,18 @@ export default function ListDetail() {
                 className="h-3.5 w-3.5 accent-gold"
               />
               {t('listDetail.showSubspecies')}
+            </label>
+          )}
+
+          {authSession && (
+            <label className="flex items-center gap-2 text-xs text-ink">
+              <input
+                type="checkbox"
+                checked={Boolean(list.sharedToLeaderboard)}
+                onChange={(e) => updateListMeta(list.id, { sharedToLeaderboard: e.target.checked })}
+                className="h-3.5 w-3.5 accent-gold"
+              />
+              {t('listDetail.shareToLeaderboard')}
             </label>
           )}
         </div>

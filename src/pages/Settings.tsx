@@ -7,13 +7,23 @@ import { exportBackup, parseBackup } from '../storage/db';
 export default function Settings() {
   const { t, language, setLanguage } = useLanguage();
   const { lists, replaceAllLists, syncStatus } = useLists();
-  const { enabled: syncEnabled, session, authLoading, signInWithEmail, signOut } = useAuth();
+  const { enabled: syncEnabled, session, authLoading, signInWithEmail, signOut, displayName, setDisplayName } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [email, setEmail] = useState('');
   const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [sendingLink, setSendingLink] = useState(false);
+  const [nameInput, setNameInput] = useState(displayName ?? '');
+  const [savingName, setSavingName] = useState(false);
+
+  async function handleSaveName(e: React.FormEvent) {
+    e.preventDefault();
+    if (!nameInput.trim()) return;
+    setSavingName(true);
+    await setDisplayName(nameInput.trim());
+    setSavingName(false);
+  }
 
   async function handleSendLink(e: React.FormEvent) {
     e.preventDefault();
@@ -110,6 +120,23 @@ export default function Settings() {
                 {t('sync.signOut')}
               </button>
             </div>
+            <form onSubmit={handleSaveName} className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
+              <label className="text-sm text-ink">{t('sync.displayNameLabel')}</label>
+              <input
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder={t('sync.displayNamePlaceholder')}
+                className="min-w-[160px] flex-1 rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:border-gold"
+              />
+              <button
+                type="submit"
+                disabled={savingName}
+                className="rounded-lg bg-gold px-4 py-1.5 text-sm font-medium text-white hover:bg-gold-dark disabled:opacity-50"
+              >
+                {t('common.save')}
+              </button>
+            </form>
+            <p className="mt-1.5 text-xs text-muted">{t('sync.displayNameHint')}</p>
           </div>
         ) : (
           <div>

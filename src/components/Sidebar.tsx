@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
-import { HomeIcon, PlusIcon, CheckIcon, BookIcon, SettingsIcon, CloseIcon } from './icons';
+import { HomeIcon, PlusIcon, CheckIcon, TrophyIcon, BookIcon, SettingsIcon, CloseIcon } from './icons';
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -46,6 +46,10 @@ export default function Sidebar({ onNavigate, onClose }: SidebarProps) {
         <NavLink to="/nytt-kryss" className={linkClass} onClick={onNavigate}>
           <CheckIcon />
           {t('nav.newSighting')}
+        </NavLink>
+        <NavLink to="/topplista" className={linkClass} onClick={onNavigate}>
+          <TrophyIcon />
+          {t('nav.leaderboard')}
         </NavLink>
         <NavLink to="/hjalp" className={linkClass} onClick={onNavigate}>
           <BookIcon />
