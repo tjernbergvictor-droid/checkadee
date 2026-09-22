@@ -55,6 +55,9 @@ const sv = {
     importList: 'Importera',
     deleteConfirmTitle: 'Ta bort "{name}"?',
     deleteConfirmBody: 'Alla observationer i listan raderas permanent. Detta går inte att ångra.',
+    uncheckConfirmTitle: 'Ta bort krysset för {name}?',
+    uncheckConfirmBody: 'Arten markeras som ej sedd i den här listan. Eventuella sparade datum/platser tas inte bort, men syns inte förrän du markerar arten som sedd igen.',
+    uncheckConfirmButton: 'Ta bort krysset',
     category: {
       D: 'Kategori D',
       E: 'Kategori E',
@@ -273,6 +276,9 @@ const en: Translations = {
     importList: 'Import',
     deleteConfirmTitle: 'Delete "{name}"?',
     deleteConfirmBody: 'All observations in this list will be permanently deleted. This cannot be undone.',
+    uncheckConfirmTitle: 'Remove the tick for {name}?',
+    uncheckConfirmBody: "The species will be marked as not seen in this list. Any saved dates/locations are not deleted, but won't show until you mark the species as seen again.",
+    uncheckConfirmButton: 'Remove tick',
     category: {
       D: 'Category D',
       E: 'Category E',

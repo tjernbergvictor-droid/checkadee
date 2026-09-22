@@ -44,6 +44,7 @@ export default function ListDetail() {
   const [detailSpecies, setDetailSpecies] = useState<ReferenceSpecies | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [pendingUncheck, setPendingUncheck] = useState<ReferenceSpecies | null>(null);
 
   const isFreeform = list?.source === 'avilist';
   const q = query.trim().toLowerCase();
@@ -131,6 +132,16 @@ export default function ListDetail() {
     setDetailSpecies(species);
   }
 
+  function requestToggleSeen(species: ReferenceSpecies) {
+    if (!list) return;
+    const isSeen = list.observations[species.id]?.seen ?? false;
+    if (isSeen) {
+      setPendingUncheck(species);
+    } else {
+      toggleSeen(list.id, species.id);
+    }
+  }
+
   function handleModalSave(sightings: Parameters<typeof setSightings>[2], seen: boolean) {
     if (!list || !detailSpecies) return;
     setSightings(list.id, detailSpecies.id, sightings, seen);
@@ -165,7 +176,7 @@ export default function ListDetail() {
           observation={l.observations[s.id]}
           mode={mode}
           color={l.color}
-          onToggleSeen={() => toggleSeen(l.id, s.id)}
+          onToggleSeen={() => requestToggleSeen(s)}
           onOpenDetail={() => openDetail(s)}
         />
         {subs.map((sub) => (
@@ -175,7 +186,7 @@ export default function ListDetail() {
             observation={l.observations[sub.id]}
             mode={mode}
             color={l.color}
-            onToggleSeen={() => toggleSeen(l.id, sub.id)}
+            onToggleSeen={() => requestToggleSeen(sub)}
             onOpenDetail={() => openDetail(sub)}
             indent
           />
@@ -388,7 +399,7 @@ export default function ListDetail() {
               observation={list.observations[s.id]}
               mode={mode}
               color={list.color}
-              onToggleSeen={() => toggleSeen(list.id, s.id)}
+              onToggleSeen={() => requestToggleSeen(s)}
               onOpenDetail={() => openDetail(s)}
               number={chronological.dated.length + chronological.undated.length - i}
               dateLabel={date}
@@ -406,7 +417,7 @@ export default function ListDetail() {
                   observation={list.observations[s.id]}
                   mode={mode}
                   color={list.color}
-                  onToggleSeen={() => toggleSeen(list.id, s.id)}
+                  onToggleSeen={() => requestToggleSeen(s)}
                   onOpenDetail={() => openDetail(s)}
                   number={chronological.undated.length - i}
                 />
@@ -462,7 +473,7 @@ export default function ListDetail() {
                   observation={list.observations[s.id]}
                   mode={mode}
                   color={list.color}
-                  onToggleSeen={() => toggleSeen(list.id, s.id)}
+                  onToggleSeen={() => requestToggleSeen(s)}
                   onOpenDetail={() => openDetail(s)}
                 />
               ))}
@@ -482,7 +493,7 @@ export default function ListDetail() {
                     observation={list.observations[s.id]}
                     mode={mode}
                     color={list.color}
-                    onToggleSeen={() => toggleSeen(list.id, s.id)}
+                    onToggleSeen={() => requestToggleSeen(s)}
                     onOpenDetail={() => openDetail(s)}
                   />
                 ))
@@ -505,6 +516,31 @@ export default function ListDetail() {
 
       {showImport && data && (
         <ImportModal species={data.species} color={list.color} onClose={() => setShowImport(false)} onImport={handleImportConfirm} />
+      )}
+
+      {pendingUncheck && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setPendingUncheck(null)}>
+          <div className="w-full max-w-sm rounded-2xl bg-card p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-display text-lg font-semibold text-ink">
+              {t('listDetail.uncheckConfirmTitle', { name: displayName(pendingUncheck, language).primary })}
+            </h3>
+            <p className="mt-2 text-sm text-muted">{t('listDetail.uncheckConfirmBody')}</p>
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={() => {
+                  toggleSeen(list.id, pendingUncheck.id);
+                  setPendingUncheck(null);
+                }}
+                className="flex-1 rounded-xl bg-danger px-4 py-2.5 font-medium text-white"
+              >
+                {t('listDetail.uncheckConfirmButton')}
+              </button>
+              <button onClick={() => setPendingUncheck(null)} className="rounded-xl border border-border px-4 py-2.5 font-medium text-ink">
+                {t('common.cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {confirmDelete && (
