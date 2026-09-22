@@ -21,6 +21,11 @@ const sv = {
     openList: 'Öppna',
     lastActivity: 'Senast ändrad {date}',
     noActivity: 'Inga observationer än',
+    recentActivity: 'Senaste aktivitet',
+    thisMonthTitle: 'Den här månaden, tidigare år',
+    thisMonthSubtitle: 'Arter du sett i {month} under tidigare år',
+    yearsAgo: '{count} år sedan',
+    yearlyTitle: 'Arter per år',
   },
   source: {
     sverige: 'Sverigelistan',
@@ -242,6 +247,11 @@ const en: Translations = {
     openList: 'Open',
     lastActivity: 'Last updated {date}',
     noActivity: 'No observations yet',
+    recentActivity: 'Recent activity',
+    thisMonthTitle: 'This month, in years past',
+    thisMonthSubtitle: 'Species you saw in {month} in previous years',
+    yearsAgo: '{count} years ago',
+    yearlyTitle: 'Species per year',
   },
   source: {
     sverige: 'Swedish List',

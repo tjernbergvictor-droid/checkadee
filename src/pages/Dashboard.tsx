@@ -1,12 +1,26 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useLists } from '../state/ListsContext';
+import { useMultiReferenceData } from '../hooks/useMultiReferenceData';
+import { getDatedTicks, yearCounts, sameMonthPastYears } from '../lib/activityStats';
 import ListCard from '../components/ListCard';
+import RecentActivity from '../components/RecentActivity';
+import ThisMonthHistory from '../components/ThisMonthHistory';
+import YearlyChart from '../components/YearlyChart';
 import { PlusIcon } from '../components/icons';
 
 export default function Dashboard() {
   const { t } = useLanguage();
   const { lists, loading } = useLists();
+
+  const uniqueSources = useMemo(() => [...new Set(lists.map((l) => l.source))], [lists]);
+  const refData = useMultiReferenceData(uniqueSources);
+
+  const datedTicks = useMemo(() => getDatedTicks(lists, refData), [lists, refData]);
+  const recent = useMemo(() => [...datedTicks].sort((a, b) => (a.date < b.date ? 1 : -1)), [datedTicks]);
+  const thisMonth = useMemo(() => sameMonthPastYears(datedTicks), [datedTicks]);
+  const yearly = useMemo(() => yearCounts(datedTicks), [datedTicks]);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-8 md:py-10">
@@ -35,6 +49,19 @@ export default function Dashboard() {
             <PlusIcon width={18} height={18} />
             {t('dashboard.createFirst')}
           </Link>
+        </div>
+      )}
+
+      {(recent.length > 0 || thisMonth.length > 0) && (
+        <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <RecentActivity entries={recent} />
+          <ThisMonthHistory entries={thisMonth} />
+        </div>
+      )}
+
+      {yearly.length > 1 && (
+        <div className="mb-6">
+          <YearlyChart data={yearly} />
         </div>
       )}
 
