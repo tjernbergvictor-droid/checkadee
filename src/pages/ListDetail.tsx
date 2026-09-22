@@ -10,7 +10,16 @@ import SpeciesRow from '../components/SpeciesRow';
 import ObservationModal from '../components/ObservationModal';
 import ImportModal from '../components/ImportModal';
 import ProgressBar from '../components/ProgressBar';
-import { ArrowLeftIcon, ChevronDownIcon, ChevronRightIcon, SearchIcon, TrashIcon, UploadIcon, XCircleIcon } from '../components/icons';
+import {
+  ArrowLeftIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  PencilIcon,
+  SearchIcon,
+  TrashIcon,
+  UploadIcon,
+  XCircleIcon,
+} from '../components/icons';
 import type { MatchedImportRow } from '../lib/importParser';
 import type { ReferenceSpecies, Sighting } from '../types';
 
@@ -40,8 +49,11 @@ export default function ListDetail() {
   const q = query.trim().toLowerCase();
 
   const mainSpecies = useMemo(() => (data && list ? visibleMainSpecies(data.species, list) : []), [data, list]);
-  const total = mainSpecies.length;
+  const computedTotal = mainSpecies.length;
+  const total = list?.manualTotal ?? computedTotal;
   const seenCount = list ? countSeen(list, mainSpecies.map((s) => s.id)) : 0;
+  const [editingTotal, setEditingTotal] = useState(false);
+  const [totalInput, setTotalInput] = useState('');
 
   function matchesQuery(s: ReferenceSpecies) {
     if (!q) return true;
@@ -212,7 +224,56 @@ export default function ListDetail() {
         ) : (
           <div className="mt-3">
             <div className="mb-1.5 flex items-baseline justify-between text-sm">
-              <span className="font-medium text-ink">{t('listDetail.speciesSeenOf', { seen: seenCount, total })}</span>
+              {editingTotal ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const n = parseInt(totalInput, 10);
+                    updateListMeta(list.id, { manualTotal: Number.isFinite(n) && n > 0 ? n : undefined });
+                    setEditingTotal(false);
+                  }}
+                  className="flex flex-wrap items-center gap-1.5"
+                >
+                  <span className="font-medium text-ink">{seenCount}</span>
+                  <span className="text-muted">{t('listDetail.of')}</span>
+                  <input
+                    type="number"
+                    min={1}
+                    autoFocus
+                    value={totalInput}
+                    onChange={(e) => setTotalInput(e.target.value)}
+                    className="w-20 rounded-lg border border-border px-2 py-1 text-sm outline-none focus:border-gold"
+                  />
+                  <button type="submit" className="text-xs font-medium text-gold-dark underline">
+                    {t('common.save')}
+                  </button>
+                  <button type="button" onClick={() => setEditingTotal(false)} className="text-xs text-muted underline">
+                    {t('common.cancel')}
+                  </button>
+                </form>
+              ) : (
+                <span className="flex flex-wrap items-center gap-1.5 font-medium text-ink">
+                  {t('listDetail.speciesSeenOf', { seen: seenCount, total })}
+                  <button
+                    onClick={() => {
+                      setTotalInput(String(total));
+                      setEditingTotal(true);
+                    }}
+                    className="text-muted hover:text-ink"
+                    aria-label={t('listDetail.editTotal')}
+                  >
+                    <PencilIcon width={13} height={13} />
+                  </button>
+                  {list.manualTotal !== undefined && (
+                    <button
+                      onClick={() => updateListMeta(list.id, { manualTotal: undefined })}
+                      className="text-[11px] text-muted underline"
+                    >
+                      {t('listDetail.resetTotal', { count: computedTotal })}
+                    </button>
+                  )}
+                </span>
+              )}
               <span className="text-muted">{total > 0 ? Math.round((seenCount / total) * 100) : 0}%</span>
             </div>
             <ProgressBar value={seenCount} total={total} color={list.color} />

@@ -16,7 +16,7 @@ export default function ListCard({ list }: { list: UserList }) {
   let seen = seenCount;
   if (data && !isFreeform) {
     const main = visibleMainSpecies(data.species, list);
-    total = main.length;
+    total = list.manualTotal ?? main.length;
     seen = countSeen(list, main.map((s) => s.id));
   }
 

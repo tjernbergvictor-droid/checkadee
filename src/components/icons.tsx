@@ -100,6 +100,14 @@ export const DownloadIcon = (p: IconProps) =>
     </>,
     p,
   );
+export const PencilIcon = (p: IconProps) =>
+  base(
+    <>
+      <path d="m16.5 3.5 4 4L7 21l-4.5 1L4 17.5 16.5 3.5Z" />
+      <path d="m14.5 5.5 4 4" />
+    </>,
+    p,
+  );
 export const XCircleIcon = (p: IconProps) =>
   base(
     <>

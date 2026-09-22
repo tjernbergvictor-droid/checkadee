@@ -53,6 +53,7 @@ export interface UserList {
   color: string;
   source: SourceListId;
   includeCategoryDE?: boolean;
+  manualTotal?: number;
   createdAt: string;
   observations: Record<string, Observation>;
 }

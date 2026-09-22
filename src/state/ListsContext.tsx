@@ -16,7 +16,7 @@ interface ListsContextValue {
   syncStatus: SyncStatus;
   createList: (input: { name: string; color: string; source: SourceListId; includeCategoryDE?: boolean }) => UserList;
   deleteList: (id: string) => void;
-  updateListMeta: (id: string, patch: Partial<Pick<UserList, 'name' | 'color' | 'includeCategoryDE'>>) => void;
+  updateListMeta: (id: string, patch: Partial<Pick<UserList, 'name' | 'color' | 'includeCategoryDE' | 'manualTotal'>>) => void;
   getList: (id: string) => UserList | undefined;
   toggleSeen: (listId: string, speciesId: string) => void;
   setSightings: (listId: string, speciesId: string, sightings: Sighting[], seen?: boolean) => void;
