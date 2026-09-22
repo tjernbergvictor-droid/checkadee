@@ -56,6 +56,9 @@ const sv = {
     of: 'av',
     editTotal: 'Ändra totalt antal arter',
     resetTotal: 'Återställ till {count} (standard)',
+    linkedTo: 'Länkad till:',
+    notLinked: 'Inte länkad till någon lista',
+    editLink: 'Ändra länkad lista',
     deleteList: 'Ta bort lista',
     importList: 'Importera',
     deleteConfirmTitle: 'Ta bort "{name}"?',
@@ -105,6 +108,10 @@ const sv = {
     create: 'Skapa lista',
     cancel: 'Avbryt',
     nameRequired: 'Ange ett namn för listan.',
+    linkedListLabel: 'Basera på sedda arter i en annan lista (valfritt)',
+    linkedListHint:
+      'Listan visar då bara arter som redan är sedda i den valda listan — perfekt för t.ex. en ädellista som bara ska omfatta arter du sett, inte hela referenslistan.',
+    linkedListNone: 'Ingen — använd hela referenslistan',
   },
   newSighting: {
     title: 'Nytt kryss',
@@ -282,6 +289,9 @@ const en: Translations = {
     of: 'of',
     editTotal: 'Change total species count',
     resetTotal: 'Reset to {count} (default)',
+    linkedTo: 'Linked to:',
+    notLinked: 'Not linked to another list',
+    editLink: 'Change linked list',
     deleteList: 'Delete list',
     importList: 'Import',
     deleteConfirmTitle: 'Delete "{name}"?',
@@ -331,6 +341,10 @@ const en: Translations = {
     create: 'Create list',
     cancel: 'Cancel',
     nameRequired: 'Please enter a name for the list.',
+    linkedListLabel: 'Base it on species already seen in another list (optional)',
+    linkedListHint:
+      "The list will then only show species already seen in the chosen list — great for e.g. a self-found list that should only cover species you've seen, not the whole reference list.",
+    linkedListNone: 'None — use the full reference list',
   },
   newSighting: {
     title: 'New sighting',

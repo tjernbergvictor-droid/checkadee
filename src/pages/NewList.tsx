@@ -14,13 +14,14 @@ const SOURCES: { id: SourceListId; titleKey: string; descKey: string }[] = [
 
 export default function NewList() {
   const { t } = useLanguage();
-  const { createList } = useLists();
+  const { createList, lists } = useLists();
   const navigate = useNavigate();
 
   const [name, setName] = useState('');
   const [color, setColor] = useState<string>(LIST_COLORS[0]);
   const [source, setSource] = useState<SourceListId>('sverige');
   const [includeCategoryDE, setIncludeCategoryDE] = useState(false);
+  const [linkedListId, setLinkedListId] = useState('');
   const [error, setError] = useState('');
 
   function handleSubmit(e: React.FormEvent) {
@@ -29,7 +30,13 @@ export default function NewList() {
       setError(t('newList.nameRequired'));
       return;
     }
-    const list = createList({ name: name.trim(), color, source, includeCategoryDE: source === 'sverige' ? includeCategoryDE : undefined });
+    const list = createList({
+      name: name.trim(),
+      color,
+      source,
+      includeCategoryDE: source === 'sverige' ? includeCategoryDE : undefined,
+      linkedListId: linkedListId || undefined,
+    });
     navigate(`/lista/${list.id}`);
   }
 
@@ -102,6 +109,25 @@ export default function NewList() {
             </label>
           )}
         </div>
+
+        {lists.length > 0 && (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-ink">{t('newList.linkedListLabel')}</label>
+            <p className="mb-2 text-xs text-muted">{t('newList.linkedListHint')}</p>
+            <select
+              value={linkedListId}
+              onChange={(e) => setLinkedListId(e.target.value)}
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-ink outline-none focus:border-gold"
+            >
+              <option value="">{t('newList.linkedListNone')}</option>
+              {lists.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="rounded-xl bg-charcoal/5 p-4">
           <p className="text-sm font-medium text-ink">{t('newList.inputModeInfoTitle')}</p>

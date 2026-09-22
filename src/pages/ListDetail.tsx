@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useLists } from '../state/ListsContext';
 import { useReferenceList } from '../hooks/useReferenceList';
-import { visibleMainSpecies, countSeen, subspeciesOf } from '../lib/listStats';
+import { visibleMainSpecies, countSeen, subspeciesOf, applyLinkedListScope } from '../lib/listStats';
 import { groupSpecies } from '../lib/groupSpecies';
 import { displayName } from '../lib/displayName';
 import SpeciesRow from '../components/SpeciesRow';
@@ -30,9 +30,10 @@ export default function ListDetail() {
   const { listId } = useParams();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const { getList, updateListMeta, deleteList, toggleSeen, setSightings } = useLists();
+  const { lists, getList, updateListMeta, deleteList, toggleSeen, setSightings } = useLists();
 
   const list = listId ? getList(listId) : undefined;
+  const linkedList = list?.linkedListId ? getList(list.linkedListId) : undefined;
   const { data, loading } = useReferenceList(list?.source ?? 'vp');
 
   const [query, setQuery] = useState('');
@@ -49,12 +50,17 @@ export default function ListDetail() {
   const isFreeform = list?.source === 'avilist';
   const q = query.trim().toLowerCase();
 
-  const mainSpecies = useMemo(() => (data && list ? visibleMainSpecies(data.species, list) : []), [data, list]);
+  const mainSpecies = useMemo(() => {
+    if (!data || !list) return [];
+    const base = visibleMainSpecies(data.species, list);
+    return applyLinkedListScope(base, list, linkedList);
+  }, [data, list, linkedList]);
   const computedTotal = mainSpecies.length;
   const total = list?.manualTotal ?? computedTotal;
   const seenCount = list ? countSeen(list, mainSpecies.map((s) => s.id)) : 0;
   const [editingTotal, setEditingTotal] = useState(false);
   const [totalInput, setTotalInput] = useState('');
+  const [editingLink, setEditingLink] = useState(false);
 
   function matchesQuery(s: ReferenceSpecies) {
     if (!q) return true;
@@ -288,6 +294,45 @@ export default function ListDetail() {
               <span className="text-muted">{total > 0 ? Math.round((seenCount / total) * 100) : 0}%</span>
             </div>
             <ProgressBar value={seenCount} total={total} color={list.color} />
+          </div>
+        )}
+
+        {editingLink ? (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
+            <span className="text-muted">{t('listDetail.linkedTo')}</span>
+            <select
+              value={list.linkedListId ?? ''}
+              onChange={(e) => {
+                updateListMeta(list.id, { linkedListId: e.target.value || undefined });
+                setEditingLink(false);
+              }}
+              className="rounded-lg border border-border px-2 py-1 text-xs outline-none focus:border-gold"
+            >
+              <option value="">{t('newList.linkedListNone')}</option>
+              {lists
+                .filter((l) => l.id !== list.id)
+                .map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
+                ))}
+            </select>
+            <button onClick={() => setEditingLink(false)} className="text-muted underline">
+              {t('common.cancel')}
+            </button>
+          </div>
+        ) : (
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted">
+            {linkedList ? (
+              <span>
+                {t('listDetail.linkedTo')} <strong className="text-ink">{linkedList.name}</strong>
+              </span>
+            ) : (
+              <span>{t('listDetail.notLinked')}</span>
+            )}
+            <button onClick={() => setEditingLink(true)} className="text-muted hover:text-ink" aria-label={t('listDetail.editLink')}>
+              <PencilIcon width={11} height={11} />
+            </button>
           </div>
         )}
       </div>

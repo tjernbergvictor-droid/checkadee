@@ -54,6 +54,8 @@ export interface UserList {
   source: SourceListId;
   includeCategoryDE?: boolean;
   manualTotal?: number;
+  linkedListId?: string;
+  sharedToLeaderboard?: boolean;
   createdAt: string;
   observations: Record<string, Observation>;
 }

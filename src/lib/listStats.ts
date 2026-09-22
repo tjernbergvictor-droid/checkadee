@@ -19,3 +19,8 @@ export function countSeen(list: UserList, speciesIds: string[]): number {
 export function subspeciesOf(species: ReferenceSpecies[], parentId: string): ReferenceSpecies[] {
   return species.filter((s) => s.parentId === parentId);
 }
+
+export function applyLinkedListScope(species: ReferenceSpecies[], list: UserList, linkedList: UserList | undefined): ReferenceSpecies[] {
+  if (!linkedList) return species;
+  return species.filter((s) => linkedList.observations[s.id]?.seen || list.observations[s.id]?.seen);
+}

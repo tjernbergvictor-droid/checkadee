@@ -14,9 +14,18 @@ interface ListsContextValue {
   lists: UserList[];
   loading: boolean;
   syncStatus: SyncStatus;
-  createList: (input: { name: string; color: string; source: SourceListId; includeCategoryDE?: boolean }) => UserList;
+  createList: (input: {
+    name: string;
+    color: string;
+    source: SourceListId;
+    includeCategoryDE?: boolean;
+    linkedListId?: string;
+  }) => UserList;
   deleteList: (id: string) => void;
-  updateListMeta: (id: string, patch: Partial<Pick<UserList, 'name' | 'color' | 'includeCategoryDE' | 'manualTotal'>>) => void;
+  updateListMeta: (
+    id: string,
+    patch: Partial<Pick<UserList, 'name' | 'color' | 'includeCategoryDE' | 'manualTotal' | 'linkedListId' | 'sharedToLeaderboard'>>,
+  ) => void;
   getList: (id: string) => UserList | undefined;
   toggleSeen: (listId: string, speciesId: string) => void;
   setSightings: (listId: string, speciesId: string, sightings: Sighting[], seen?: boolean) => void;
@@ -100,13 +109,14 @@ export function ListsProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timer);
   }, [lists, syncEnabled, userId]);
 
-  const createList: ListsContextValue['createList'] = useCallback(({ name, color, source, includeCategoryDE }) => {
+  const createList: ListsContextValue['createList'] = useCallback(({ name, color, source, includeCategoryDE, linkedListId }) => {
     const newList: UserList = {
       id: uid(),
       name,
       color,
       source,
       includeCategoryDE,
+      linkedListId,
       createdAt: new Date().toISOString(),
       observations: {},
     };
