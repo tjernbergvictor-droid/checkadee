@@ -38,7 +38,7 @@ export default function ListDetail() {
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<'quick' | 'detail'>('quick');
   const [seenFilter, setSeenFilter] = useState<SeenFilter>('all');
-  const [viewMode, setViewMode] = useState<ViewMode>('grouped');
+  const [viewMode, setViewMode] = useState<ViewMode>('chronological');
   const [showSubspecies, setShowSubspecies] = useState(false);
   const [collapsedOrders, setCollapsedOrders] = useState<Set<string>>(new Set());
   const [detailSpecies, setDetailSpecies] = useState<ReferenceSpecies | null>(null);
