@@ -62,7 +62,14 @@ export default function NewSighting() {
 
   function selectSpecies(species: ReferenceSpecies) {
     setSelectedSpecies(species);
-    setSelectedListIds(new Set(lists.filter((l) => refData[l.source]?.species.some((s) => s.id === species.id)).map((l) => l.id)));
+    setSelectedListIds(
+      new Set(
+        lists
+          .filter((l) => refData[l.source]?.species.some((s) => s.id === species.id))
+          .filter((l) => !l.observations[species.id]?.seen)
+          .map((l) => l.id),
+      ),
+    );
     setSightingsState([]);
     setSeenNoDetails(true);
     setQuery('');
@@ -197,24 +204,33 @@ export default function NewSighting() {
           </div>
 
           <div>
-            <p className="mb-2 text-sm font-medium text-ink">{t('newSighting.targetLists')}</p>
+            <p className="text-sm font-medium text-ink">{t('newSighting.targetLists')}</p>
+            <p className="mb-2 text-xs text-muted">{t('newSighting.targetListsHint')}</p>
             <div className="space-y-2">
-              {applicableLists.map((list) => (
-                <label
-                  key={list.id}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 has-[:checked]:border-gold"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedListIds.has(list.id)}
-                    onChange={() => toggleListId(list.id)}
-                    className="h-4 w-4 accent-gold"
-                  />
-                  <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: list.color }} />
-                  <span className="font-medium text-ink">{list.name}</span>
-                  <span className="ml-auto text-xs text-muted uppercase">{t(`source.${list.source}Short`)}</span>
-                </label>
-              ))}
+              {applicableLists.map((list) => {
+                const alreadySeen = Boolean(selectedSpecies && list.observations[selectedSpecies.id]?.seen);
+                return (
+                  <label
+                    key={list.id}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 has-[:checked]:border-gold"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedListIds.has(list.id)}
+                      onChange={() => toggleListId(list.id)}
+                      className="h-4 w-4 accent-gold"
+                    />
+                    <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: list.color }} />
+                    <span className="font-medium text-ink">{list.name}</span>
+                    {alreadySeen && (
+                      <span className="rounded-full bg-cream-dark px-2 py-0.5 text-[10px] font-medium tracking-wide text-muted uppercase">
+                        {t('newSighting.alreadySeen')}
+                      </span>
+                    )}
+                    <span className="ml-auto text-xs text-muted uppercase">{t(`source.${list.source}Short`)}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
