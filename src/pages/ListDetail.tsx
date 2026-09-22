@@ -77,7 +77,7 @@ export default function ListDetail() {
       if (dates[0]) dated.push({ species: s, date: dates[0] });
       else undated.push(s);
     }
-    dated.sort((a, b) => a.date.localeCompare(b.date));
+    dated.sort((a, b) => b.date.localeCompare(a.date));
     return { dated, undated };
   }, [isFreeform, list, mainSpecies, q]);
 
@@ -329,7 +329,7 @@ export default function ListDetail() {
               color={list.color}
               onToggleSeen={() => toggleSeen(list.id, s.id)}
               onOpenDetail={() => openDetail(s)}
-              number={i + 1}
+              number={chronological.dated.length + chronological.undated.length - i}
               dateLabel={date}
             />
           ))}
@@ -347,7 +347,7 @@ export default function ListDetail() {
                   color={list.color}
                   onToggleSeen={() => toggleSeen(list.id, s.id)}
                   onOpenDetail={() => openDetail(s)}
-                  number={chronological.dated.length + i + 1}
+                  number={chronological.undated.length - i}
                 />
               ))}
             </>
