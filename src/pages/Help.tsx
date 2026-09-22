@@ -34,6 +34,22 @@ export default function Help() {
           <p className="text-muted">{t('help.usageImportBody')}</p>
         </div>
         <div>
+          <h3 className="font-medium text-ink">{t('help.usageNewSightingTitle')}</h3>
+          <p className="text-muted">{t('help.usageNewSightingBody')}</p>
+        </div>
+        <div>
+          <h3 className="font-medium text-ink">{t('help.usageChronologicalTitle')}</h3>
+          <p className="text-muted">{t('help.usageChronologicalBody')}</p>
+        </div>
+        <div>
+          <h3 className="font-medium text-ink">{t('help.usageManualTotalTitle')}</h3>
+          <p className="text-muted">{t('help.usageManualTotalBody')}</p>
+        </div>
+        <div>
+          <h3 className="font-medium text-ink">{t('help.usageSyncTitle')}</h3>
+          <p className="text-muted">{t('help.usageSyncBody')}</p>
+        </div>
+        <div>
           <h3 className="font-medium text-ink">{t('help.usageLanguageTitle')}</h3>
           <p className="text-muted">{t('help.usageLanguageBody')}</p>
         </div>

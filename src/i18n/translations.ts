@@ -136,7 +136,19 @@ const sv = {
       'I Snabbläge markerar ett tryck på en art den direkt som sedd — perfekt för att snabbt lägga in en grundlista med många arter. I Detaljerat läge öppnas ett formulär där du kan ange datum, plats och anteckningar för observationen. Du kan lägga till flera observationer av samma art.',
     usageImportTitle: 'Importera en befintlig lista',
     usageImportBody:
-      'Har du redan sett arter som finns i t.ex. ett Excel-ark? Öppna listan och klicka på "Importera". Ladda ner mallen (CSV), fyll i art, datum, plats och anteckningar per rad, och ladda upp filen. Har din fil en annan struktur kan du klistra in innehållet i ett samtal med Claude eller en annan AI och be den fylla i mallen åt dig innan du laddar upp.',
+      'Har du redan sett arter som finns i t.ex. ett Excel-ark? Öppna listan och klicka på "Importera". Ladda ner mallen (CSV), fyll i art, datum, plats och anteckningar per rad, och ladda upp filen. Har din fil en annan struktur kan du klistra in innehållet i ett samtal med Claude eller en annan AI och be den fylla i mallen åt dig innan du laddar upp. Namn som inte matchar exakt får ett förslag om något liknande hittas, så enstaka felstavningar behöver inte stoppa importen.',
+    usageNewSightingTitle: 'Lägg till en art i flera listor på en gång',
+    usageNewSightingBody:
+      'Klicka på "Nytt kryss" i menyn när du sett en art som hör hemma i flera av dina listor samtidigt, t.ex. en ny svensk art som också är ny för din Västpalearktis-lista. Sök upp arten, kryssa i vilka listor den ska läggas till i, och spara — den läggs till i alla valda listor med samma datum/plats i ett svep.',
+    usageChronologicalTitle: 'Se dina kryss i kronologisk ordning',
+    usageChronologicalBody:
+      'I en lista kan du växla från "Grupperat" (efter ordning och familj) till "Kryssordning" för att se dina sedda arter numrerade efter datum, nyast överst — perfekt för att se vilken art som var din 300:e eller 400:e. Arter utan sparat datum hamnar i en egen sektion i slutet, fortfarande medräknade i numreringen.',
+    usageManualTotalTitle: 'Ändra listans totala antal arter',
+    usageManualTotalBody:
+      'Listans procentandel räknas normalt mot hela referenslistan (t.ex. alla 1196 VP-arter). Vill du istället se din andel av t.ex. en specifik ös fågelfauna, klicka på pennikonen bredvid artantalet i listan och ange rätt totalsumma manuellt. "Återställ"-länken tar dig tillbaka till standardvärdet.',
+    usageSyncTitle: 'Synka mellan mobil och dator',
+    usageSyncBody:
+      'Under Inställningar kan du logga in med din e-post (ingen lösenord behövs) för att synka dina listor mellan flera enheter. Läs mer under rubriken "Synk mellan enheter" i Inställningar.',
     usageLanguageTitle: 'Byt språk',
     usageLanguageBody: 'Växla mellan svenska och engelska under Inställningar när som helst.',
     credits: 'Fågeldata baseras på AviList (2025/2026), VP11 och Sverigelistan 2026 från BirdLife Sverige.',
@@ -340,7 +352,19 @@ const en: Translations = {
       'In Quick mode, tapping a species marks it as seen instantly — great for quickly entering a base list with many species. In Detailed mode, a form opens where you can enter date, location and notes for the sighting. You can add several sightings of the same species.',
     usageImportTitle: 'Import an existing list',
     usageImportBody:
-      'Already seen species that are listed in, say, an Excel sheet? Open the list and click "Import". Download the template (CSV), fill in species, date, location and notes per row, and upload the file. If your file has a different structure, paste its contents into a chat with Claude or another AI and ask it to fill in the template for you before uploading.',
+      'Already seen species that are listed in, say, an Excel sheet? Open the list and click "Import". Download the template (CSV), fill in species, date, location and notes per row, and upload the file. If your file has a different structure, paste its contents into a chat with Claude or another AI and ask it to fill in the template for you before uploading. A name that does not match exactly gets a suggestion if something similar is found, so the odd typo will not block the import.',
+    usageNewSightingTitle: 'Add a species to several lists at once',
+    usageNewSightingBody:
+      'Click "New sighting" in the menu when you have seen a species that belongs in several of your lists at the same time, e.g. a new Swedish species that is also new for your Western Palearctic list. Search for the species, tick which lists it should be added to, and save — it is added to every selected list with the same date/location in one go.',
+    usageChronologicalTitle: 'See your ticks in chronological order',
+    usageChronologicalBody:
+      'In a list you can switch from "Grouped" (by order and family) to "Tick order" to see your seen species numbered by date, newest first — great for seeing which species was your 300th or 400th. Species with no saved date land in their own section at the end, still counted in the numbering.',
+    usageManualTotalTitle: "Change a list's total species count",
+    usageManualTotalBody:
+      "A list's percentage is normally calculated against the whole reference list (e.g. all 1196 WP species). If you instead want to see your share of, say, one specific island's bird fauna, click the pencil icon next to the species count and enter the correct total yourself. The \"Reset\" link takes you back to the default value.",
+    usageSyncTitle: 'Sync between phone and computer',
+    usageSyncBody:
+      'Under Settings you can sign in with your email (no password needed) to sync your lists across devices. See the "Sync across devices" heading under Settings for details.',
     usageLanguageTitle: 'Change language',
     usageLanguageBody: 'Switch between Swedish and English at any time under Settings.',
     credits: 'Bird data is based on AviList (2025/2026), VP11 and the 2026 Swedish List from BirdLife Sweden.',
