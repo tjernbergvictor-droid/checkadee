@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './AuthContext';
 import { loadReferenceList } from '../data/referenceData';
 import { visibleMainSpecies, applyLinkedListScope, countSeen } from '../lib/listStats';
+import { capitalizeFirst } from '../lib/displayName';
 import type { Observation, Sighting, SourceListId, UserList } from '../types';
 
 function uid() {
@@ -132,7 +133,7 @@ export function ListsProvider({ children }: { children: ReactNode }) {
             if (s.date && (!lastDate || s.date > lastDate)) {
               lastDate = s.date;
               const species = data.species.find((sp) => sp.id === obs.speciesId);
-              lastName = species ? species.nameSv || species.nameEn : obs.speciesId;
+              lastName = species ? (species.nameSv ? capitalizeFirst(species.nameSv) : species.nameEn) : obs.speciesId;
             }
           }
         }
