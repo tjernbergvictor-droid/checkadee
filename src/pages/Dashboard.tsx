@@ -52,6 +52,12 @@ export default function Dashboard() {
         </div>
       )}
 
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {lists.map((list) => (
+          <ListCard key={list.id} list={list} />
+        ))}
+      </div>
+
       {(recent.length > 0 || thisMonth.length > 0) && (
         <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <RecentActivity entries={recent} />
@@ -64,12 +70,6 @@ export default function Dashboard() {
           <YearlyChart data={yearly} />
         </div>
       )}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {lists.map((list) => (
-          <ListCard key={list.id} list={list} />
-        ))}
-      </div>
     </div>
   );
 }
