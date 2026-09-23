@@ -11,6 +11,7 @@ import SpeciesRow from '../components/SpeciesRow';
 import ObservationModal from '../components/ObservationModal';
 import ImportModal from '../components/ImportModal';
 import ProgressBar from '../components/ProgressBar';
+import ColorSwatchPicker from '../components/ColorSwatchPicker';
 import {
   ArrowLeftIcon,
   ChevronDownIcon,
@@ -63,6 +64,9 @@ export default function ListDetail() {
   const [editingTotal, setEditingTotal] = useState(false);
   const [totalInput, setTotalInput] = useState('');
   const [editingLink, setEditingLink] = useState(false);
+  const [editingMeta, setEditingMeta] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+  const [colorInput, setColorInput] = useState('');
 
   function matchesQuery(s: ReferenceSpecies) {
     if (!q) return true;
@@ -229,15 +233,58 @@ export default function ListDetail() {
       </div>
 
       <div className="mb-6 rounded-2xl border border-border bg-card p-5" style={{ borderTopWidth: 4, borderTopColor: list.color }}>
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="font-display text-2xl font-semibold text-ink">{list.name}</h1>
-          <span
-            className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium tracking-wide uppercase"
-            style={{ backgroundColor: `color-mix(in srgb, ${list.color} 16%, white)`, color: list.color }}
+        {editingMeta ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const trimmed = nameInput.trim();
+              if (trimmed) {
+                updateListMeta(list.id, { name: trimmed, color: colorInput });
+              }
+              setEditingMeta(false);
+            }}
+            className="space-y-3"
           >
-            {t(`source.${list.source}Short`)}
-          </span>
-        </div>
+            <input
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              autoFocus
+              className="w-full rounded-xl border border-border bg-card px-3 py-2 font-display text-xl font-semibold text-ink outline-none focus:border-gold"
+            />
+            <ColorSwatchPicker value={colorInput} onChange={setColorInput} />
+            <div className="flex items-center gap-3">
+              <button type="submit" className="text-xs font-medium text-gold-dark underline">
+                {t('common.save')}
+              </button>
+              <button type="button" onClick={() => setEditingMeta(false)} className="text-xs text-muted underline">
+                {t('common.cancel')}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="flex items-center gap-1.5 font-display text-2xl font-semibold text-ink">
+              {list.name}
+              <button
+                onClick={() => {
+                  setNameInput(list.name);
+                  setColorInput(list.color);
+                  setEditingMeta(true);
+                }}
+                className="text-muted hover:text-ink"
+                aria-label={t('listDetail.editNameColor')}
+              >
+                <PencilIcon width={13} height={13} />
+              </button>
+            </h1>
+            <span
+              className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium tracking-wide uppercase"
+              style={{ backgroundColor: `color-mix(in srgb, ${list.color} 16%, white)`, color: list.color }}
+            >
+              {t(`source.${list.source}Short`)}
+            </span>
+          </div>
+        )}
         {isFreeform ? (
           <p className="mt-2 text-sm text-muted">{yourSpecies.length} arter</p>
         ) : (

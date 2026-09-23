@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
+import { useLists } from '../state/ListsContext';
 import { useReferenceList } from '../hooks/useReferenceList';
-import { visibleMainSpecies, countSeen } from '../lib/listStats';
+import { visibleMainSpecies, countSeen, applyLinkedListScope } from '../lib/listStats';
 import ProgressBar from './ProgressBar';
 import type { UserList } from '../types';
 
 export default function ListCard({ list }: { list: UserList }) {
   const { t, language } = useLanguage();
+  const { getList } = useLists();
   const { data } = useReferenceList(list.source);
+  const linkedList = list.linkedListId ? getList(list.linkedListId) : undefined;
 
   const seenCount = Object.values(list.observations).filter((o) => o.seen).length;
   const isFreeform = list.source === 'avilist';
@@ -15,7 +18,7 @@ export default function ListCard({ list }: { list: UserList }) {
   let total = 0;
   let seen = seenCount;
   if (data && !isFreeform) {
-    const main = visibleMainSpecies(data.species, list);
+    const main = applyLinkedListScope(visibleMainSpecies(data.species, list), list, linkedList);
     total = list.manualTotal ?? main.length;
     seen = countSeen(list, main.map((s) => s.id));
   }
